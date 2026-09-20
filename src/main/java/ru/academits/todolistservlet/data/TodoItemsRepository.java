@@ -5,7 +5,7 @@ import java.util.List;
 public interface TodoItemsRepository {
     List<TodoItem> getAll();
 
-    void create(TodoItem item);
+    void create(String itemText);
 
     void update(TodoItem item);
 

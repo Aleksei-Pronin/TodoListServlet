@@ -14,8 +14,4 @@ public class TodoItem {
     public TodoItem(TodoItem item) {
         this(item.id, item.text);
     }
-
-    public TodoItem(String text) {
-        this.text = text;
-    }
 }

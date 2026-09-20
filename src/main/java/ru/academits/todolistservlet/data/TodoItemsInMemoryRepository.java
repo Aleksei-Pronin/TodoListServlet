@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TodoItemsInMemoryRepository implements TodoItemsRepository {
-    private final List<TodoItem> todoItems = new ArrayList<>();
-    private final AtomicInteger currentItemId = new AtomicInteger(1);
+    private static final List<TodoItem> todoItems = new ArrayList<>();
+    private static final AtomicInteger currentItemId = new AtomicInteger(1);
 
     @Override
     public List<TodoItem> getAll() {
@@ -18,10 +18,10 @@ public class TodoItemsInMemoryRepository implements TodoItemsRepository {
     }
 
     @Override
-    public void create(TodoItem item) {
+    public void create(String itemText) {
         synchronized (todoItems) {
             int id = currentItemId.getAndIncrement();
-            todoItems.add(new TodoItem(id, item.getText()));
+            todoItems.add(new TodoItem(id, itemText));
         }
     }
 

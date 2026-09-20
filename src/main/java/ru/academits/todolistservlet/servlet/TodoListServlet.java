@@ -13,11 +13,14 @@ import ru.academits.todolistservlet.data.TodoItemsInMemoryRepository;
 import ru.academits.todolistservlet.data.TodoItemsRepository;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Serial;
 import java.util.List;
 
 @WebServlet("")
 public class TodoListServlet extends HttpServlet {
+    @Serial
+    private static final long serialVersionUID = 1231L;
+
     private TodoItemsRepository todoItemsRepository;
 
     @Override
@@ -88,6 +91,7 @@ public class TodoListServlet extends HttpServlet {
                                     <form action="%s" method="POST">
                                         <button class="edit-button" type="submit" name="action" value="edit">Редактировать</button>
                                         <button class="delete-button" type="submit" name="action" value="delete">Удалить</button>
+                                
                                         <input type="hidden" name="id" value="%s">
                                     </form>
                                 </li>
@@ -98,8 +102,7 @@ public class TodoListServlet extends HttpServlet {
             }
         }
 
-        PrintWriter writer = resp.getWriter();
-        writer.printf("""
+        resp.getWriter().printf("""
                         <!DOCTYPE html>
                         <html lang="ru">
                         <head>
@@ -151,7 +154,7 @@ public class TodoListServlet extends HttpServlet {
                         HttpSession session = req.getSession();
                         session.setAttribute("createError", "Необходимо заполнить поле");
                     } else {
-                        todoItemsRepository.create(new TodoItem(text.trim()));
+                        todoItemsRepository.create(text.trim());
                     }
                 }
 
