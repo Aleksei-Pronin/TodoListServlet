@@ -1,7 +1,5 @@
 package ru.academits.todolistservlet.servlet;
 
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,16 +19,10 @@ public class TodoListServlet extends HttpServlet {
     @Serial
     private static final long serialVersionUID = 1231L;
 
-    private TodoItemsRepository todoItemsRepository;
-
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-        todoItemsRepository = new TodoItemsInMemoryRepository();
-    }
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        TodoItemsRepository todoItemsRepository = new TodoItemsInMemoryRepository();
+
         resp.setContentType("text/html");
 
         String baseUrl = req.getContextPath() + "/";
@@ -38,6 +30,11 @@ public class TodoListServlet extends HttpServlet {
         String styleCssUrl = req.getContextPath() + "/style.css";
 
         HttpSession session = req.getSession();
+
+        String generalError = session.getAttribute("generalError") != null
+                ? session.getAttribute("generalError").toString()
+                : "";
+
         String createError = session.getAttribute("createError") != null
                 ? session.getAttribute("createError").toString()
                 : "";
@@ -52,6 +49,7 @@ public class TodoListServlet extends HttpServlet {
 
         Integer editId = (Integer) session.getAttribute("editId");
 
+        session.removeAttribute("generalError");
         session.removeAttribute("createError");
         session.removeAttribute("saveError");
 
@@ -128,6 +126,8 @@ public class TodoListServlet extends HttpServlet {
                                 <button type="submit" name="action" value="create">Создать</button>
                             </form>
                         
+                            <div class="general-error">%s</div>
+                        
                             <ul class="todo-list">%s</ul>
                         </div>
                         </body>
@@ -138,12 +138,19 @@ public class TodoListServlet extends HttpServlet {
                 baseUrl,
                 createError.isEmpty() ? "" : " invalid",
                 StringEscapeUtils.escapeHtml4(createError),
+                StringEscapeUtils.escapeHtml4(generalError),
                 todoItemStringBuilder);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        TodoItemsRepository todoItemsRepository = new TodoItemsInMemoryRepository();
+
         String action = req.getParameter("action");
+
+        if (action == null) {
+            return;
+        }
 
         try {
             switch (action) {
@@ -159,12 +166,24 @@ public class TodoListServlet extends HttpServlet {
                 }
 
                 case "edit" -> {
-                    int id = Integer.parseInt(req.getParameter("id"));
+                    String idParameter = req.getParameter("id");
+
+                    if (idParameter == null) {
+                        return;
+                    }
+
+                    int id = Integer.parseInt(idParameter);
                     req.getSession().setAttribute("editId", id);
                 }
 
                 case "save" -> {
-                    int id = Integer.parseInt(req.getParameter("id"));
+                    String idParameter = req.getParameter("id");
+
+                    if (idParameter == null) {
+                        return;
+                    }
+
+                    int id = Integer.parseInt(idParameter);
                     String text = req.getParameter("text");
 
                     if (text == null || text.isBlank()) {
@@ -185,14 +204,21 @@ public class TodoListServlet extends HttpServlet {
                 }
 
                 case "delete" -> {
-                    int id = Integer.parseInt(req.getParameter("id"));
+                    String idParameter = req.getParameter("id");
+
+                    if (idParameter == null) {
+                        return;
+                    }
+
+                    int id = Integer.parseInt(idParameter);
                     todoItemsRepository.delete(id);
                     req.getSession().removeAttribute("editId");
                 }
             }
-        } catch (IllegalArgumentException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        } catch (NumberFormatException _) {
             return;
+        } catch (IllegalArgumentException e) {
+            req.getSession().setAttribute("generalError", e.getMessage());
         }
 
         resp.sendRedirect(getServletContext().getContextPath() + "/");

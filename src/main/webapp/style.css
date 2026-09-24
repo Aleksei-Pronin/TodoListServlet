@@ -58,6 +58,12 @@ body {
     height: 14px;
 }
 
+.general-error {
+    color: #ea4130;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
 .field-wrapper.invalid input,
 .edit-container.invalid .edit-todo-item-text-field {
     border-color: #ea4130;

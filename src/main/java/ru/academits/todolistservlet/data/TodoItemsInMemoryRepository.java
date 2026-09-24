@@ -34,7 +34,7 @@ public class TodoItemsInMemoryRepository implements TodoItemsRepository {
                     .orElse(null);
 
             if (repositoryItem == null) {
-                throw new IllegalArgumentException("TodoItem with id " + item.getId() + " not found");
+                throw new IllegalArgumentException("Задача с id " + item.getId() + " не найдена");
             }
 
             repositoryItem.setText(item.getText());
